@@ -1,6 +1,5 @@
 package malltree.com.malltree;
 
-import android.os.Handler;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
@@ -8,84 +7,68 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
 
-import java.io.BufferedReader;
-import java.io.InputStreamReader;
-import java.net.HttpURLConnection;
-import java.net.URL;
+import malltree.com.malltree.Api.Api;
+import malltree.com.malltree.Api.Repo;
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
+import retrofit2.Retrofit;
+import retrofit2.converter.gson.GsonConverterFactory;
+
 
 public class MainActivity extends AppCompatActivity {
 
-    private TextView tv;
-    String urlAddress = "http://192.168.0.5:8080/"; // 웹사이트 주소를 저장할 변수
-    Handler handler = new Handler(); // 화면에 그려주기 위한 핸들러 객체
 
-    //demo_view
 
-    @Override
+  @Override
     protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_main);
+      super.onCreate(savedInstanceState);
+      setContentView(R.layout.activity_main);
 
-        // 웹에서 html 읽어오기
-        //    1. 인터넷 권한 얻어오기 AndroidManifest.xml
-        //    2. 쓰레드를 작성
-        //    3. Handler 객체를 통해야만 화면을 그릴수 있다
+      //  서버 주소 (현재 localhost ip)
+      final String GET_POST = "http://192.168.43.214:8080/";
 
-        tv = (TextView)findViewById(R.id.demo_view);
-        Button b = (Button)findViewById(R.id.button_demo);
-        b.setOnClickListener(new View.OnClickListener() {
+      final TextView txt01 = (TextView)findViewById(R.id.txt01);
+      final Button btn01 = (Button)findViewById(R.id.btn01);
+
+      Retrofit client = new Retrofit.Builder()
+          .baseUrl(GET_POST)
+          .addConverterFactory(GsonConverterFactory.create()).build();
+
+      final Api service = client.create(Api.class);
+
+      final Call<Repo> repo = service.repo(111,"test");
+      Log.d("repo", repo.toString());
+
+
+      btn01.setOnClickListener(new View.OnClickListener() {
+        @Override
+        public void onClick(View v) {
+
+          Log.d("repo", repo.request().toString());
+
+          repo.enqueue(new Callback<Repo>() {
             @Override
-            public void onClick(View v) {
-                loadHtml(); // 웹에서 html 읽어오기
+            public void onResponse(Call<Repo> call, Response<Repo> response) {
+              if (response.isSuccessful()) {
+                Repo repo = response.body();
+                txt01.setText(String.valueOf(repo.getContent()));
+              } else {
+
+              }
             }
-        });
+
+            @Override
+            public void onFailure(Call<Repo> call, Throwable t) {
+
+            }
+
+          });
+
+
+        }
+      }); //setOnClickListener
 
     }
-
-    void loadHtml() { // 웹에서 html 읽어오기
-        Thread t = new Thread(new Runnable() {
-            @Override
-            public void run() {
-                final StringBuffer sb = new StringBuffer();
-
-                try {
-                    URL url = new URL(urlAddress);
-                    HttpURLConnection conn =
-                            (HttpURLConnection)url.openConnection();// 접속
-                    if (conn != null) {
-                        conn.setConnectTimeout(2000);
-                        conn.setUseCaches(false);
-                        if (conn.getResponseCode()
-                                ==HttpURLConnection.HTTP_OK){
-                            //    데이터 읽기
-                            BufferedReader br
-                                    = new BufferedReader(new InputStreamReader
-                                    (conn.getInputStream(),"euc-kr"));//"utf-8"
-                            while(true) {
-                                String line = br.readLine();
-                                if (line == null) break;
-                                sb.append(line+"\n");
-                            }
-                            br.close(); // 스트림 해제
-                        }
-                        conn.disconnect(); // 연결 끊기
-                    }
-                    // 값을 출력하기
-                    Log.d("test", sb.toString());
-                    handler.post(new Runnable() {
-                        @Override
-                        public void run() {
-                            tv.setText(sb.toString());
-                        }
-                    });
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
-            }
-        });
-        t.start(); // 쓰레드 시작
-    }
-
-
 
 }
