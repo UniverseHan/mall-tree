@@ -10,13 +10,16 @@
     android:orientation="vertical"
     tools:context="malltree.com.malltree.MainActivity">
 
-    <EditText
+    <TextView
         android:layout_width="match_parent"
-        android:layout_height="100dp"
-        android:id="@+id/editText" />
+        android:layout_height="40dp"
+        android:id="@+id/txt01"
+        android:background="#eee"
+        />
     <Button
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:id="@+id/btn01"
         android:text="등록"/>
 
 </LinearLayout>
