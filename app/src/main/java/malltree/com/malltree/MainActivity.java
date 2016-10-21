@@ -16,7 +16,6 @@ import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
-import android.text.Editable;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -28,12 +27,16 @@ import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import java.io.File;
 import java.io.IOException;
 import java.util.List;
 
 import malltree.com.malltree.Recycler.ProductAdapter;
 import malltree.com.malltree.RetrofitApi.HttpApi;
 import malltree.com.malltree.RetrofitApi.Product;
+import okhttp3.MediaType;
+import okhttp3.MultipartBody;
+import okhttp3.RequestBody;
 import okhttp3.ResponseBody;
 import retrofit2.Call;
 import retrofit2.Callback;
@@ -63,8 +66,8 @@ public class MainActivity extends AppCompatActivity {
     super.onCreate(savedInstanceState);
     setContentView(R.layout.activity_main);
 
-    //Q) url은 고정?
-    String url = "http://192.168.56.1:8080/";
+    //Q) url은 고정? url 유효성 검사도 필요한가?
+    String url = "http://192.168.1.147:8080/";
 
     Button btn01 = (Button)findViewById(R.id.btn01);
     Button btn02 = (Button)findViewById(R.id.btn02);
@@ -80,7 +83,7 @@ public class MainActivity extends AppCompatActivity {
     //RecyclerView
     final RecyclerView mainRecyclerView = (RecyclerView)findViewById(R.id.recycle_frame);
 
-    //최초 화면 생성시 RecyclerView생성
+    //최초 화면 생성시 RecyclerView생성 - List항목이 없는경우 표시 화면 필요
     Call<List<Product>> listProduct = service.getProductList();
     listProduct.enqueue(new Callback<List<Product>>() {
       @Override
@@ -172,16 +175,6 @@ public class MainActivity extends AppCompatActivity {
       }
     }); //btnCancelProduct.setOnClickListener
 
-    // popup Dim
-    FrameLayout popupDim = (FrameLayout)findViewById(R.id.popup_dim);
-    popupDim.setOnClickListener(new View.OnClickListener() {
-      @Override
-      public void onClick(View v) {
-        popFrame.setVisibility(View.GONE);
-      }
-    }); //popupDim.setOnClickListener
-
-
 
     //List 업데이트
     btn02.setOnClickListener(new View.OnClickListener() {
@@ -230,7 +223,7 @@ public class MainActivity extends AppCompatActivity {
 
 // ##################################################################################
 
-    // Image 등록 버튼
+    // Image 등록 버튼 - 갤러리에서 이미지 가져오기
     Button btnAddImage = (Button)findViewById(R.id.btn_findPhoto);
     btnAddImage.setOnClickListener(new View.OnClickListener() {
       @Override
@@ -265,18 +258,55 @@ public class MainActivity extends AppCompatActivity {
     }); //btnAddImage.setOnClickListener
 
 
-// ##################################################################################
-
+    //카메라 권한설정, 불러오기
+    cameraSetup();
 
   } //onCreate - END
 
-  //사진 받아온 결과
+
+  //카메라 권한설정, 불러오기
+  private void cameraSetup(){
+    Button cameraButton = (Button)findViewById(R.id.btn_shootPhoto);
+    cameraButton.setOnClickListener(new View.OnClickListener() {
+      @Override
+      public void onClick(View v) {
+        int SDK_INT = Build.VERSION.SDK_INT;
+
+        // 권한이 없을경우
+        if (SDK_INT>=23 && ContextCompat.checkSelfPermission(MainActivity.this,
+            Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED) {
+          // 최초 권한 요청인지, 혹은 사용자에 의한 재요청인지 확인
+          if (ActivityCompat.shouldShowRequestPermissionRationale(MainActivity.this,
+              Manifest.permission.CAMERA)) {
+            // 사용자가 임의로 권한을 취소시킨 경우
+            // 권한 재요청
+            ActivityCompat.requestPermissions(MainActivity.this,
+                new String[]{Manifest.permission.CAMERA},
+                REQ_CODE_SELECT_IMAGE);
+          } else {
+            // 최초로 권한을 요청하는 경우(첫실행)
+            ActivityCompat.requestPermissions(MainActivity.this,
+                new String[]{Manifest.permission.CAMERA},
+                REQ_CODE_SELECT_IMAGE);
+          }
+        } else {
+          // 사용 권한이 있음을 확인한 경우
+          Intent cameraIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
+          startActivityForResult(cameraIntent, REQ_CODE_SELECT_IMAGE);
+        }
+      }
+    });
+  } // cameraSetup()
+
+  //사진 받아온 결과 - 촬영하거나, 갤러리 선택한 사진
   @Override
   protected void onActivityResult(int requestCode, int resultCode, Intent data){
+
     if (requestCode == REQ_CODE_SELECT_IMAGE){
       if(resultCode== Activity.RESULT_OK){
         // 이미지뷰 선언
         ImageView popupProductImg = (ImageView)findViewById(R.id.selectedPhoto);
+        popupProductImg.setAdjustViewBounds(true);
 
         //Uri로 이미 이름 읽어오기 : 맨아래 만들어둔 getImageNameToUri 메소드 사용
         String imgName_String = getImageNameToUri(data.getData(),"name");
@@ -297,6 +327,7 @@ public class MainActivity extends AppCompatActivity {
 
   // Uri 구하기
   public String getImageNameToUri(Uri data,String returnType){
+
     String[] proj = { MediaStore.Images.Media.DATA };
     Cursor cursor = managedQuery(data, proj, null, null, null);
     int column_index = cursor.getColumnIndexOrThrow(MediaStore.Images.Media.DATA);
@@ -310,6 +341,7 @@ public class MainActivity extends AppCompatActivity {
     } else {
       return imgName;
     }
+
   }
 
 

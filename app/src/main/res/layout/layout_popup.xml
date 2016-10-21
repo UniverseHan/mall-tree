@@ -12,19 +12,23 @@
             android:id="@+id/popup_dim"
             android:alpha="0.6"></FrameLayout>
 
+    <ScrollView
+        android:layout_width="300dp"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center|center_vertical"
+        android:layout_marginBottom="30dp"
+        android:padding="10dp"
+        android:background="#efefef">
         <LinearLayout
-            android:layout_width="300dp"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_gravity="center|center_vertical"
-            android:layout_marginBottom="30dp"
-            android:padding="10dp"
             android:orientation="vertical"
-            android:background="#efefef"
             android:id="@+id/popup_inner">
             <ImageView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:background="#e1e1e1"
+                android:maxHeight="140dp"
                 android:id="@+id/selectedPhoto"
                 android:minHeight="100dp"/>
             <Button
@@ -61,6 +65,7 @@
                 android:text="취소"
                 android:id="@+id/btn_cancelProductAdd"/>
         </LinearLayout>
+    </ScrollView>
 
 
 </FrameLayout>
