@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+              android:orientation="vertical"
+              android:layout_width="match_parent"
+              android:layout_height="match_parent"
+              android:id="@+id/popup_frame">
+
+        <FrameLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:background="#000000"
+            android:id="@+id/popup_dim"
+            android:alpha="0.6"></FrameLayout>
+
+    <ScrollView
+        android:layout_width="300dp"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center|center_vertical"
+        android:layout_marginBottom="30dp"
+        android:padding="10dp"
+        android:background="#efefef">
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:id="@+id/popup_inner">
+            <ImageView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:background="#e1e1e1"
+                android:maxHeight="140dp"
+                android:id="@+id/selectedPhoto"
+                android:minHeight="100dp"/>
+            <Button
+                android:layout_width="match_parent"
+                android:layout_height="40dp"
+                android:text="사진촬영"
+                android:id="@+id/btn_shootPhoto"/>
+            <Button
+                android:layout_width="match_parent"
+                android:layout_height="40dp"
+                android:text="사진찾기"
+                android:id="@+id/btn_findPhoto"/>
+            <EditText
+                android:layout_width="match_parent"
+                android:layout_height="40dp"
+                android:background="#e2e2e2"
+                android:layout_marginBottom="5dp"
+                android:id="@+id/input_productName"
+                />
+            <EditText
+                android:layout_width="match_parent"
+                android:layout_height="40dp"
+                android:background="#e2e2e2"
+                android:inputType="number"
+                android:id="@+id/input_productPrice"/>
+            <Button
+                android:layout_width="match_parent"
+                android:layout_height="40dp"
+                android:text="상품추가하기"
+                android:id="@+id/btn_confirmProductAdd"/>
+            <Button
+                android:layout_width="match_parent"
+                android:layout_height="40dp"
+                android:text="취소"
+                android:id="@+id/btn_cancelProductAdd"/>
+        </LinearLayout>
+    </ScrollView>
+
+
+</FrameLayout>
